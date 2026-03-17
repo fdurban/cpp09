@@ -2,60 +2,50 @@
 #include <string>
 #include <fstream>
 
-
-
-std::string	trim(const std::string &line)
-{
-	size_t	beginning;
-	size_t	end;
-	beginning = line.find_first_not_of(" \t");
-	end = line.find_last_not_of(" \t");
-	return (line.substr(beginning, end + 1));
-}
-
 bool	parseDate(const std::string & date)
 {
-	std::string	trimmedate;
-	trimmedate = trim(date);
 	//std::cout<<trimmedate<<std::endl;
-	if (trimmedate.size() != 10)
+	size_t start = date.find_first_not_of(" \t");
+	size_t end = date.find_last_not_of(" \t");
+	if (start == std::string::npos) return false;
+	
+	if ((end - start) + 1 != 10)
 	{
-		std::cout<<trimmedate.size()<<std::endl;
+		std::cout<<end - start<<std::endl;
 		return false;
 	}
-	if (trimmedate[4] != '-' || trimmedate[7] != '-')
+	if (date[start + 4] != '-' || date[start + 7] != '-')
 		return false;
-	for(size_t i = 0; i < trimmedate.size(); i++)
+	for(size_t i = start; i <= end ; i++)
 	{
-		if(i == 4 || i == 7)
+		if(i == start + 4 || i == start + 7)
 			continue;
-		if(trimmedate[i] < '0' || trimmedate[i] > '9')
+		if(date[i] < '0' || date[i] > '9')
 			return false;
 	}
-	int year = std::atoi(trimmedate.substr(0, 4).c_str());
-	int month = std::atoi(trimmedate.substr(5, 2).c_str());
-	int day = std::atoi(trimmedate.substr(8, 2).c_str());
+	int year = (date[start] - '0') * 1000 + 
+	(date[start +1] - '0') * 100 +
+	(date[start + 2] - '0') * 10 +
+	date[start + 3] - '0';
+	int month = (date[start + 5] - '0') * 10 +
+	(date[start + 6] - '0');
+	int day = (date[start + 8] - '0') * 10 +
+	(date[start + 9] - '0');
 	std::cout<<month<<" "<<day<<" "<<year<<std::endl;
-	std::cout<<trimmedate<<std::endl;
-	if (year < 0 || year > 12)
+	std::cout<<date<<std::endl;
+	if (month < 1 || month > 12)
 		return false;
-	bool	isLeapYear = false;
-	if(year % 4 == 0)
+	static const int daysInMonths[12] = {31, 28, 31, 30, 31,30, 31, 31, 30, 31,30,31};
+	bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+	int maxDays = daysInMonths[month - 1];
+	if (month == 2 && isLeapYear)
 	{
-		if(year % 100 == 0)
-		{
-			if(year % 400 == 0)
-			{
-				isLeapYear = true;
-			}
-			else
-				isLeapYear = false;
-		}
-		else
-			isLeapYear = true;
+		maxDays = 29;
 	}
-	else
-		isLeapYear = false;
+	if (day < 1 || day > maxDays)
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -70,7 +60,8 @@ bool	parseInput(const std::string &line)
 	if(pos == std::string::npos)
 		return false;
 	date = line.substr(0, pos);
-	parseDate(date);
+	if(!parseDate(date))
+		return false;
 	return true;
 }
 
@@ -78,7 +69,10 @@ bool	parseInput(const std::string &line)
 int main(int argc, char **argv)
 {
 	if(argc != 2)
+	{
 		std::cout<<"Not the right number of arguments"<<std::endl;
+		return 1;
+	}
 	std::ifstream infile(argv[1]);
 	std::string line;
 	if(infile.is_open())
