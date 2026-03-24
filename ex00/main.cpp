@@ -1,14 +1,15 @@
+#include "BitcoinExchange.hpp"
 #include <iostream>
 #include <string>
 #include <fstream>
-
-
-bool	isLeapYear(int year)
+#include <map>
+#include <sstream>
+bool	BitcoinExchange::isLeapYear(int year)
 {
 	return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
-bool	isValidDate(int year, int month, int day)
+bool	BitcoinExchange::isValidDate(int year, int month, int day)
 {
 	static const int daysInMonths[12] = {31, 28, 31, 30, 31,30, 31, 31, 30, 31,30,31};
 	int maxDays = daysInMonths[month - 1];
@@ -22,7 +23,7 @@ bool	isValidDate(int year, int month, int day)
 	}
 	return day <=maxDays;
 }
-bool	parseDate(const std::string & date)
+bool	BitcoinExchange::parseDate(const std::string & date)
 {
 	//std::cout<<trimmedate<<std::endl;
 	size_t start = date.find_first_not_of(" \t");
@@ -56,19 +57,22 @@ bool	parseDate(const std::string & date)
 	return isValidDate(year, month, day);
 }
 
-bool	parsePrice(const std::string &price)
+bool	BitcoinExchange::parsePrice(const std::string &price)
 {
-	std::map<std::string,  int> database;
 //	size_t start = price.find_first_not_of(" \t");
 //	size_t end = price.find_last_not_of(" \t");
-	float result;
-	std::stringstream ss(price)
-	std::cout<<result<<std::endl;
-	if(!(ss >> result)|| result < 0)
-		std::cout<<"Error: invalid price"<<std::endl;
+	float result = 0.0;
+	std::stringstream ss(price);
+	//std::cout<<result<<std::endl;
+	if(!(ss >> result)|| result < 0 || result > 1000)
+	{
+		std::cout<<"Error: invalid price"<<" "<<result<<std::endl;
+		return false;
+	}
+	return true;
 }
 
-bool	parseInput(const std::string &line, char divider)
+bool	BitcoinExchange::parseInput(const std::string &line, char divider, bool databaseFilled)
 {
 	size_t pos;
 	std::string	date;
@@ -85,33 +89,36 @@ bool	parseInput(const std::string &line, char divider)
 	std::cout<<price<<std::endl;
 	if(!parseDate(date))
 		return false;
+	if(!parsePrice(price))
+		return false;
+	std::stringstream ss(price);
+	if(!(ss >> result)|| result < 0 || result > 1000)
+	{
+		std::cout<<"Error: invalid price"<<" "<<result<<std::endl;
+		return false;
+	}
+	std::map<std::string, double>::iterator it = this->database.lower_bound(date);
 	return true;
 }
 
-
-int main(int argc, char **argv)
+void	processfile(std::string infile , std::string header, char divider, bool databaseFilled)
 {
-	if(argc != 2)
-	{
-		std::cout<<"Not the right number of arguments"<<std::endl;
-		return 1;
-	}
-	std::ifstream infile(argv[1]);
+	std::ifstream inputfile(infile.c_str());
 	std::string line;
-	if(infile.is_open())
+	if(inputfile.is_open())
 	{
-		std::getline(infile, line);
-		if(line != "date | value")
+		std::getline(inputfile, line);
+		if(line != header)
 		{
 			std::cout<<"Error: header part of the file"<<std::endl;
-			return 1;
+			return ;
 		}
-		while(std::getline(infile, line))
+		while(std::getline(inputfile, line))
 		{
-			if(!parseInput(line, '|'))
+			if(!parseInput(line, divider))
 			{
 				std::cout<<"Error: Not the right input";
-				return 1;
+				return ;
 			}
 		}
 		
@@ -120,28 +127,17 @@ int main(int argc, char **argv)
 	{
 		std::cout<<"Something went wrong"<<std::endl;
 	}
-	std::ifstream data("data.csv");
-	std::string dataline;
-	if(infile.is_open())
+}
+
+int main(int argc, char **argv)
+{
+	bool	databaseFilled = false;
+	if(argc != 2)
 	{
-		std::getline(data, dataline);
-		if(dataline  != "date,exchange_rate")
-		{
-			std::cout<<"Error: header part of the data file"<<std::endl;
-			return 1;
-			while(std::getline(data, dataline))
-			{
-				if(!parseInput(dataline, ','))
-				{
-					std::cout<<"Error, not the right data input";
-					return 1;
-				}
-			}
-		}
-	}
-	else
-	{
-		std::cout<<"Something went wrong in the datafile"<<std::endl;
+		std::cout<<"Not the right number of arguments"<<std::endl;
 		return 1;
 	}
+	processfile("data.csv", "date,exchange_rate", ',', databaseFilled);
+	databaseFilled = true;
+	processfile(argv[1], "date | value", '|', databaseFilled);
 }
