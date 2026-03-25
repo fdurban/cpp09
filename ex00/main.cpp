@@ -77,31 +77,49 @@ bool	BitcoinExchange::parseInput(const std::string &line, char divider, bool dat
 	size_t pos;
 	std::string	date;
 	std::string	price;
+	float		result = 0.0;
+	//float		rate = 0.0;
 	//std::cout<<line<<std::endl;
 	pos = line.find(divider);
 	if(pos == std::string::npos)
+	{
+		std::cout<<"Error: Wrong Format"<<std::endl;
 		return false;
+	}
 	date = line.substr(0, pos);
 	//pos = line.find("|", pos + 1);
 	price = line.substr(pos + 1 , '\n');
 	//if(pos != std::string::npos)
 	//	return false;
-	std::cout<<price<<std::endl;
+	//std::cout<<price<<std::endl;
 	if(!parseDate(date))
+	{
+		std::cout<<"Error: Not the right format"<<std::endl;
 		return false;
-	if(!parsePrice(price))
-		return false;
+	}
+	//if(!parsePrice(price))
+	//	return false;
 	std::stringstream ss(price);
-	if(!(ss >> result)|| result < 0 || result > 1000)
+	if((!(ss >> result)|| result < 0 || result > 1000) && databaseFilled)
 	{
 		std::cout<<"Error: invalid price"<<" "<<result<<std::endl;
 		return false;
 	}
-	std::map<std::string, double>::iterator it = this->database.lower_bound(date);
+	if(!databaseFilled)
+	{
+		this->database[date] = result;
+		//std::cout<<this->database[date]<<std::endl;
+	}
+	else
+	{
+		std::map<std::string, double>::iterator it = this->database.lower_bound(date);
+		std::cout<<date<<" => "<<price<<" "<<result*it->second<<std::endl;
+		//std::cout<<it->first<<std::endl;
+	}
 	return true;
 }
 
-void	processfile(std::string infile , std::string header, char divider, bool databaseFilled)
+void	BitcoinExchange::processfile(std::string infile , std::string header, char divider, bool databaseFilled)
 {
 	std::ifstream inputfile(infile.c_str());
 	std::string line;
@@ -115,10 +133,10 @@ void	processfile(std::string infile , std::string header, char divider, bool dat
 		}
 		while(std::getline(inputfile, line))
 		{
-			if(!parseInput(line, divider))
+			if(!parseInput(line, divider, databaseFilled))
 			{
-				std::cout<<"Error: Not the right input";
-				return ;
+				//std::cout<<"Error: Not the right input"<<std::endl;
+				continue;
 			}
 		}
 		
@@ -131,13 +149,14 @@ void	processfile(std::string infile , std::string header, char divider, bool dat
 
 int main(int argc, char **argv)
 {
+	BitcoinExchange btc;
 	bool	databaseFilled = false;
 	if(argc != 2)
 	{
 		std::cout<<"Not the right number of arguments"<<std::endl;
 		return 1;
 	}
-	processfile("data.csv", "date,exchange_rate", ',', databaseFilled);
+	btc.processfile("data.csv", "date,exchange_rate", ',', databaseFilled);
 	databaseFilled = true;
-	processfile(argv[1], "date | value", '|', databaseFilled);
+	btc.processfile(argv[1], "date | value", '|', databaseFilled);
 }

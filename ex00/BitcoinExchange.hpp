@@ -10,4 +10,6 @@ class BitcoinExchange
 		bool	parsePrice(const std::string &price);
 		bool	parseDate(const std::string & date);
 		bool	parseInput(const std::string &line, char divider, bool databaseFilled);
+	public:
+		void	processfile(std::string infile , std::string header, char divider, bool databaseFilled);
 };
