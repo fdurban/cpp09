@@ -28,18 +28,24 @@ PmergeMe::~PmergeMe()
 
 void PmergeMe::sort(int argc, char **argv)
 {
-	clock_t start;
-	clock_t end;
-	std::vector<Element> output;
+	clock_t startVector;
+	clock_t endVector;
+	clock_t startDeque;
+	clock_t endDeque;
+	std::vector<Element> outputVector;
 	std::deque<Element> outputDeque;
 	std::vector<Element> input = parseInput(argc, argv);
 	std::deque<Element> inputDeque = parseInputDeque(argc, argv);
-	start = clock();
-	output = sortWithIndex(input);
+	startVector = clock();
+	outputVector = sortWithIndex(input);
+	endVector = clock();
+	startDeque = clock();
 	outputDeque = sortWithIndexDeque(inputDeque);
-	end = clock();
-	double realTime = (static_cast<double>(end - start)/ CLOCKS_PER_SEC) * 1000000.0;
-	std::cout<<"realTime :"<<realTime<<"\n";
+	endDeque = clock();
+	double realTimeVector = (static_cast<double>(endVector - startVector)/ CLOCKS_PER_SEC) * 1000000.0;
+	double realTimeDeque = (static_cast<double>(endDeque - startDeque)/ CLOCKS_PER_SEC) * 1000000.0;
+	std::cout<<"realTimeVector :"<<realTimeVector<<"\n";
+	std::cout<<"realTimeDeque :"<<realTimeDeque<<"\n";
 }
 
 PmergeMe::Element PmergeMe::findLoserById(const std::vector< std::pair<size_t, Element> >& map, size_t winner_id) {
@@ -145,24 +151,6 @@ std::vector<PmergeMe::Element> PmergeMe::sortWithIndex(std::vector<Element> &cur
       local_losers_map.push_back(std::make_pair(second.id, first));
     }
   }
-  std::cout<<"Winners :";
-  for(size_t i = 0; i < winners.size(); ++i)
-  {
-	  std::cout<<winners[i].value<<" ";
-  }
-  std::cout<<"\n";
-  std::cout<<"Winners ids :";
-  for(size_t i = 0; i < winners.size(); ++i)
-  {
-	  std::cout<<winners[i].id<<" ";
-  }
-  std::cout<<"\n";
-  std::cout<<"Losers: ";
-  for(size_t i = 0; i < local_losers_map.size(); ++ i)
-  {
-	  std::cout<<local_losers_map[i].second.value<<" ";
-  }
-  std::cout<<"\n";
   if(hasStraggler)
   {
 	  straggler = *it;
@@ -171,12 +159,12 @@ std::vector<PmergeMe::Element> PmergeMe::sortWithIndex(std::vector<Element> &cur
   //Aqui empieza la recursividad
   std::vector<Element> mainChain = sortWithIndex(winners);
   //reasignamos los ids porque a cada nivel con los perdedores introducidos la lista ordenada crece
-  std::cout<<"winners ids in order: ";
+  //std::cout<<"winners ids in order: ";
   std::vector<size_t> winners_ids_in_order;
   for(size_t i = 0; i < mainChain.size(); ++i)
   {
     winners_ids_in_order.push_back(mainChain[i].id);
-    std::cout<<winners_ids_in_order[i]<<" ";
+    //std::cout<<winners_ids_in_order[i]<<" ";
   }
   std::cout<<"\n";
   //Aqui empieza la insercion de pending dentro de la mainchain que se hace tambien de forma recursiva
@@ -189,11 +177,11 @@ std::vector<PmergeMe::Element> PmergeMe::sortWithIndex(std::vector<Element> &cur
   for(size_t i = 0; i < insert_seq.size(); ++ i)
   {
     size_t b_index = insert_seq[i];
-    std::cout<<"b_index "<<b_index<<"\n";
+    //std::cout<<"b_index "<<b_index<<"\n";
     size_t winner_id = winners_ids_in_order[b_index - 1];
-    std::cout<<"winner_id :"<<winner_id<<"\n";;
+    //std::cout<<"winner_id :"<<winner_id<<"\n";;
     Element loser_to_insert = findLoserById(local_losers_map, winner_id);
-    std::cout<<"Loser to insert: "<<loser_to_insert.value<<"\n";
+    //std::cout<<"Loser to insert: "<<loser_to_insert.value<<"\n";
     size_t search_area = b_index + added_count - 1; 
     std::vector<Element>::iterator end_of_search = mainChain.begin();
     std::advance(end_of_search, search_area);
@@ -248,24 +236,7 @@ std::deque<PmergeMe::Element> PmergeMe::sortWithIndexDeque(std::deque<Element> &
       local_losers_map.push_back(std::make_pair(second.id, first));
     }
   }
-  std::cout<<"Winners :";
-  for(size_t i = 0; i < winners.size(); ++i)
-  {
-	  std::cout<<winners[i].value<<" ";
-  }
-  std::cout<<"\n";
-  std::cout<<"Winners ids :";
-  for(size_t i = 0; i < winners.size(); ++i)
-  {
-	  std::cout<<winners[i].id<<" ";
-  }
-  std::cout<<"\n";
-  std::cout<<"Losers: ";
-  for(size_t i = 0; i < local_losers_map.size(); ++ i)
-  {
-	  std::cout<<local_losers_map[i].second.value<<" ";
-  }
-  std::cout<<"\n";
+  //Aqui va lo impreso de abajo
   if(hasStraggler)
   {
 	  straggler = *it;
@@ -292,11 +263,11 @@ std::deque<PmergeMe::Element> PmergeMe::sortWithIndexDeque(std::deque<Element> &
   for(size_t i = 0; i < insert_seq.size(); ++ i)
   {
     size_t b_index = insert_seq[i];
-    std::cout<<"b_index "<<b_index<<"\n";
+    //std::cout<<"b_index "<<b_index<<"\n";
     size_t winner_id = winners_ids_in_order[b_index - 1];
-    std::cout<<"winner_id :"<<winner_id<<"\n";;
+    //std::cout<<"winner_id :"<<winner_id<<"\n";;
     Element loser_to_insert = findLoserByIdDeque(local_losers_map, winner_id);
-    std::cout<<"Loser to insert: "<<loser_to_insert.value<<"\n";
+    //std::cout<<"Loser to insert: "<<loser_to_insert.value<<"\n";
     size_t search_area = b_index + added_count - 1; 
     std::deque<Element>::iterator end_of_search = mainChain.begin();
     std::advance(end_of_search, search_area);
@@ -386,3 +357,24 @@ std::deque<PmergeMe::Element> PmergeMe::parseInputDeque(int argc, char **argv)
   }
   return (result);
 }
+
+/*
+  std::cout<<"Winners :";
+  for(size_t i = 0; i < winners.size(); ++i)
+  {
+	  std::cout<<winners[i].value<<" ";
+  }
+  std::cout<<"\n";
+  std::cout<<"Winners ids :";
+  for(size_t i = 0; i < winners.size(); ++i)
+  {
+	  std::cout<<winners[i].id<<" ";
+  }
+  std::cout<<"\n";
+  std::cout<<"Losers: ";
+  for(size_t i = 0; i < local_losers_map.size(); ++ i)
+  {
+	  std::cout<<local_losers_map[i].second.value<<" ";
+  }
+  std::cout<<"\n";
+*/
