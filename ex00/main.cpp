@@ -143,7 +143,7 @@ void	BitcoinExchange::processfile(std::string infile , std::string header, char 
 	}
 	else
 	{
-		std::cout<<"Something went wrong"<<std::endl;
+		std::cout<<"Something went wrong with the file"<<std::endl;
 	}
 }
 
