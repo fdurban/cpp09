@@ -1,30 +1,6 @@
 #include <iostream>
-#include <stack>
-#include <sstream>
+#include "RPN.hpp"
 
-bool	isOperator(std::string	token)
-{
-	return (token == "+" || token == "-" || token == "*" || token == "/");
-}
-
-int	applyOperation(int a, int b, std::string myOperator)
-{
-	if(myOperator == "+")
-		return a + b;
-	else if (myOperator == "-")
-		return a - b;
-	else if (myOperator == "*")
-		return a * b;
-	else if (myOperator == "/")
-		if(b == 0)
-		{
-			std::cout<<"Error: Can not divide by 0"<<std::endl;
-			return 0;
-		}
-		else return a/b;
-	else
-		return 0;
-}
 int main(int argc, char *argv[])
 {
 	if(argc != 2)
@@ -32,33 +8,15 @@ int main(int argc, char *argv[])
 		std::cout<<"Error: Not the right number of arguments"<<std::endl;
 		return 1;
 	}
-	std::stringstream ss(argv[1]);
-	std::stack<int> s;
-	std::string	token;
-	while(ss >> token)
+	try
 	{
-		std::cout<<token<<" ";
-		if(token.size() == 1 && std::isdigit(token[0]))
-		{
-			s.push(token[0] - '0');
-		}
-		else if(isOperator(token))
-		{
-			int b = s.top();
-			s.pop();
-			int a = s.top();
-			s.pop();
-			int c;
-			c = applyOperation(a, b, token);
-			s.push(c);
-			std::cout<<c<<std::endl;
-		}
+		RPN rpn;
+		std::cout<<rpn.evaluate(argv[1])<<std::endl;
 	}
-	std::cout<<s.top()<<"\n";
-	if(s.size() != 1)
+	catch(const std::exception &e)
 	{
-		std::cout<<"Calculation error"<<std::endl;
+		std::cerr<<"Error"<<e.what()<<"\n";
 		return 1;
 	}
-	 
+	return 0;
 }
