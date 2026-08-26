@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 {
 	if(argc != 2)
 	{
-		std::cout<<"Error: Not the right "<<std::endl;
+		std::cout<<"Error: Not the right number of arguments"<<std::endl;
 		return 1;
 	}
 	std::stringstream ss(argv[1]);
@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 			std::cout<<c<<std::endl;
 		}
 	}
+	std::cout<<s.top()<<"\n";
 	if(s.size() != 1)
 	{
 		std::cout<<"Calculation error"<<std::endl;

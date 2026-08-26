@@ -18,11 +18,9 @@ class PmergeMe
     };
     size_t comparisonCountVector;
     size_t comparisonCountDeque;
-    std::vector<Element> parseInput(int argc, char **argv);
-    std::deque<Element> parseInputDeque(int argc, char **argv);
+    std::vector<int> parseRawInput(int argc, char **argv);
     void  validateInput(const std::string &str);
     std::vector<size_t> generateJacobsthalSequence(size_t num_losers);
-    std::deque<size_t>generateJacobsthalSequenceDeque(size_t num_losers);
     std::vector<Element> sortWithIndex(std::vector<Element> &currentSeq);
     std::deque<Element>sortWithIndexDeque(std::deque<Element> &currentSeq);
     Element findLoserById(const std::vector< std::pair<size_t, Element> >& map, size_t winner_id);
