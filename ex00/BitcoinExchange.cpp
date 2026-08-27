@@ -22,10 +22,12 @@ bool BitcoinExchange::parsePrice(const std::string &priceStr, float &outValue, f
 {
     std::stringstream ss(priceStr);
     float val;
-    if (!(ss >> val) || !ss.eof()) {
-	std::cout<<"Entra aqui\n";
+    if (!(ss >> val)) {
         return false;
     }
+    std::string leftover;
+    if(ss >> leftover)
+	    return false;
     if (val < min || val > max) {
         return false;
     }
